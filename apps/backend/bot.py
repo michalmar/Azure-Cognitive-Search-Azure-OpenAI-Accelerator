@@ -81,26 +81,36 @@ class MyBot(ActivityHandler):
         cb_manager = CallbackManager(handlers=[cb_handler])
 
         # Set LLM 
-        llm = AzureChatOpenAI(deployment_name=self.model_name, temperature=0.5, max_tokens=1000, callback_manager=cb_manager)
+        llm = AzureChatOpenAI(deployment_name=self.model_name, temperature=0.1, max_tokens=600, callback_manager=cb_manager)
 
         # Initialize our Tools/Experts
-        text_indexes = ["cogsrch-index-files", "cogsrch-index-csv"]
-        doc_search = DocSearchTool(llm=llm, indexes=text_indexes,
-                           k=10, similarity_k=4, reranker_th=1,
-                           sas_token=os.environ['BLOB_SAS_TOKEN'],
-                           callback_manager=cb_manager, return_direct=True)
-        vector_only_indexes = ["cogsrch-index-books-vector"]
-        book_search = DocSearchTool(llm=llm, vector_only_indexes = vector_only_indexes,
-                           k=10, similarity_k=10, reranker_th=1,
+        # text_indexes = ["cogsrch-index-files", "cogsrch-index-csv"]
+        # doc_search = DocSearchTool(llm=llm, indexes=text_indexes,
+        #                    k=10, similarity_k=4, reranker_th=1,
+        #                    sas_token=os.environ['BLOB_SAS_TOKEN'],
+        #                    callback_manager=cb_manager, return_direct=True)
+        # vector_only_indexes = ["cogsrch-index-books-vector"]
+        # book_search = DocSearchTool(llm=llm, vector_only_indexes = vector_only_indexes,
+        #                    k=10, similarity_k=10, reranker_th=1,
+        #                    sas_token=os.environ['BLOB_SAS_TOKEN'],
+        #                    callback_manager=cb_manager, return_direct=True,
+        #                    name="@booksearch",
+        #                    description="useful when the questions includes the term: @booksearch.\n")
+        vector_only_indexes = ["cogsrch-index-custom-vector"]
+        custom_search = DocSearchTool(llm=llm, vector_only_indexes = vector_only_indexes,
+                           k=3, similarity_k=3, reranker_th=1,
                            sas_token=os.environ['BLOB_SAS_TOKEN'],
                            callback_manager=cb_manager, return_direct=True,
-                           name="@booksearch",
-                           description="useful when the questions includes the term: @booksearch.\n")
+                           # This is how you can edit the default values of name and description
+                           name="@internal",
+                           description="useful when the questions includes the term: @internal.\n",
+                           verbose=True)
         www_search = BingSearchTool(llm=llm, k=5, callback_manager=cb_manager, return_direct=True)
-        sql_search = SQLDbTool(llm=llm, k=10, callback_manager=cb_manager, return_direct=True)
+        # sql_search = SQLDbTool(llm=llm, k=10, callback_manager=cb_manager, return_direct=True)
         chatgpt_search = ChatGPTTool(llm=llm, callback_manager=cb_manager, return_direct=True)
 
-        tools = [www_search, sql_search, doc_search, chatgpt_search, book_search]
+        # tools = [www_search, sql_search, doc_search, chatgpt_search, book_search]
+        tools = [www_search,  chatgpt_search, custom_search]
 
         # Set brain Agent with persisten memory in CosmosDB
         cosmos = CosmosDBChatMessageHistory(
@@ -116,13 +126,18 @@ class MyBot(ActivityHandler):
         agent = ConversationalChatAgent.from_llm_and_tools(llm=llm, tools=tools,system_message=CUSTOM_CHATBOT_PREFIX,human_message=CUSTOM_CHATBOT_SUFFIX)
         agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory)
 
-        await turn_context.send_activity(Activity(type=ActivityTypes.typing))
-        
-        # Please note below that running a non-async function like run_agent in a separate thread won't make it truly asynchronous. It allows the function to be called without blocking the event loop, but it may still have synchronous behavior internally.
-        loop = asyncio.get_event_loop()
-        answer = await loop.run_in_executor(ThreadPoolExecutor(), run_agent, input_text, agent_chain)
-        
-        await turn_context.send_activity(answer)
+        if (turn_context.activity.text == "/reset"):
+            if (agent_chain is not None):
+                agent_chain.memory.clear()
+            await turn_context.send_activity("Memory cleared")
+        else:
+            await turn_context.send_activity(Activity(type=ActivityTypes.typing))
+            
+            # Please note below that running a non-async function like run_agent in a separate thread won't make it truly asynchronous. It allows the function to be called without blocking the event loop, but it may still have synchronous behavior internally.
+            loop = asyncio.get_event_loop()
+            answer = await loop.run_in_executor(ThreadPoolExecutor(), run_agent, input_text, agent_chain)
+            
+            await turn_context.send_activity(answer)
 
 
 

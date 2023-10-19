@@ -16,6 +16,9 @@ from botbuilder.core import (
 from botbuilder.core.integration import aiohttp_error_middleware
 from botbuilder.schema import Activity, ActivityTypes
 
+# from dotenv import load_dotenv
+# load_dotenv("credentials.env")
+
 from bot import MyBot
 from config import DefaultConfig
 

@@ -10,3 +10,6 @@ common/__pycache__/
 *.amltemp
 data/
 credentials.env
+apps/backend-test
+apps/backend/*.zip
+apps/backend/*.parameters.json

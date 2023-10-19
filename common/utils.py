@@ -467,7 +467,7 @@ def run_agent(question:str, agent_chain: AgentExecutor) -> str:
 class DocSearchResults(BaseTool):
     """Tool for Azure Search results"""
     
-    name = "search knowledge base"
+    name = "search Czech knowledge base"
     description = "search documents in search engine"
     
     indexes: List[str] = []
