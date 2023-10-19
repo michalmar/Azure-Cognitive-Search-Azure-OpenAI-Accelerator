@@ -81,27 +81,16 @@ WELCOME_MESSAGE = """
 Hello and welcome! \U0001F44B
 
 My name is Jarvis, a smart virtual assistant designed to assist you.
-Here's how you can interact with me:
-
-I have various plugins and tools at my disposal to answer your questions effectively. Here are the available options:
-
-1. \U0001F310 **@bing**: This tool allows me to access the internet and provide current information from the web.
-
-2. \U0001F4A1 **@chatgpt**: With this tool, I can draw upon my own knowledge based on the data I was trained on. Please note that my training data goes up until 2021.
-
-3. \U0001F50D **@internal**: This tool allows me to search a specialized search engine index. It includes 10,000 ArXiv computer science documents from 2020-2021 and 90,000 Covid research articles from the same years.
 
 From all of my sources, I will provide the necessary information and also mention the sources I used to derive the answer. This way, you can have transparency about the origins of the information and understand how I arrived at the response.
 
-To make the most of my capabilities, please mention the specific tool you'd like me to use when asking your question. Here's an example:
+Here's an example:
 
 ```
-@bing, who is the daughter of the President of India?
-@chatgpt, how can I read a remote file from a URL using pandas?
-@internal, Kolik muzu mit Sick days?
+Jaké mám benefity v J&T?
+Kolik muzu mit Sick days?
 ```
-
-Feel free to ask any question and specify the tool you'd like me to utilize. I'm here to assist you!
+I'm here to assist you!
 
 ---
 """
