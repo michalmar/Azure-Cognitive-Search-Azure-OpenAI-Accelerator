@@ -80,6 +80,12 @@ class MyBot(ActivityHandler):
         "Historie byla resetována na počáteční stav."
     ]
 
+    # allowed content types for file upload
+    ALLOWED_CONTENT_TYPES = [
+        "text/plain",  # ".txt"
+        "text/markdown",  # ".md"
+    ]
+
     # FAISS db 
     db = None
 
@@ -201,7 +207,8 @@ class MyBot(ActivityHandler):
         message_with_file_download = (
             False
             if not turn_context.activity.attachments
-            else turn_context.activity.attachments[0].content_type == "text/plain"
+            # else turn_context.activity.attachments[0].content_type == "text/plain"
+            else turn_context.activity.attachments[0].content_type in self.ALLOWED_CONTENT_TYPES
         )
 
         if message_with_file_download:
@@ -234,7 +241,7 @@ class MyBot(ActivityHandler):
             
             self.db = FAISS.from_documents(docs, embeddings)
 
-            await turn_context.send_activity("document loaded" + warning_msg)
+            await turn_context.send_activity("document loaded \n" + warning_msg + "\nYou can now ask questions about the document")
             return
 
             
